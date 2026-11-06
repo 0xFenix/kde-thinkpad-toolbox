@@ -1,0 +1,88 @@
+#!/bin/bash
+# Keeps the ThinkPad fan pinned at a level.
+#
+# The embedded controller (and thinkfan, if running) happily overwrite a manually
+# set level, so a single write is not enough — we keep watching and restore it.
+# We only write when the level actually changed: on some fans (seen on the
+# ThinkPad E16 Gen 2 replacement cooler) every write restarts the EC's spin-up
+# ramp, so a blind rewrite every 100 ms keeps the fan stuck at ~2000 RPM
+# instead of the requested speed.
+#
+# Safety net: if the package temperature exceeds TCRIT, control is handed back
+# to automatic mode. TCRIT=0 disables the safety net (not advised for low
+# levels — a pinned "level 0" means no airflow at all).
+#
+# Tuning: /etc/thinkpad-fan-hold.conf (INTERVAL seconds between checks,
+# default 1; TCRIT degrees C, default 90). Environment variables
+# THINKPAD_FAN_INTERVAL / THINKPAD_FAN_TCRIT override the file.
+#
+# Ported from plasma-thinkpad-fan (MIT, (c) AiSee <aiseeq@gmail.com>).
+set -u
+
+FAN=/proc/acpi/ibm/fan
+CONF=/etc/thinkpad-fan-hold.conf
+
+INTERVAL=1
+TCRIT=90
+
+if [[ -r "$CONF" ]]; then
+    while IFS='=' read -r key val; do
+        case "$key" in
+            INTERVAL) INTERVAL="$val" ;;
+            TCRIT) TCRIT="$val" ;;
+        esac
+    done < "$CONF"
+fi
+INTERVAL=${THINKPAD_FAN_INTERVAL:-$INTERVAL}
+TCRIT=${THINKPAD_FAN_TCRIT:-$TCRIT}
+
+hwmon_by_name() {
+    local n
+    for n in /sys/class/hwmon/hwmon*; do
+        [[ "$(cat "$n/name" 2>/dev/null)" == "$1" ]] && { echo "$n"; return 0; }
+    done
+    return 1
+}
+
+case "${1:-}" in
+    full)  cmd="level full-speed"; want="disengaged" ;;
+    [0-7]) cmd="level $1";         want="$1" ;;
+    *) echo "usage: ${0##*/} 0-7|full" >&2; exit 2 ;;
+esac
+
+# Validate tunables BEFORE touching hardware: a non-numeric INTERVAL used to
+# make `sleep` fail and spin this loop at 100% CPU as root.
+[[ "$INTERVAL" =~ ^[0-9]+$ ]] && (( INTERVAL >= 1 )) \
+    || { echo "${0##*/}: invalid INTERVAL '$INTERVAL' (integer >= 1)" >&2; exit 2; }
+[[ "$TCRIT" =~ ^[0-9]+$ ]] \
+    || { echo "${0##*/}: invalid TCRIT '$TCRIT' (non-negative integer, 0 disables)" >&2; exit 2; }
+
+# The over-temperature net exists for levels that can under-cool the machine.
+# "full" and the top levels move more air than "automatic" would, so releasing
+# them at TCRIT makes the CPU hotter, not safer — and makes the level unusable
+# on CPUs that sit at 90 °C+ by design.
+case "$want" in
+    disengaged|6|7) TCRIT=0 ;;
+esac
+
+current_level() { awk '/^level:/{print $2}' "$FAN" 2>/dev/null; }
+
+CORE=$(hwmon_by_name coretemp) || CORE=""
+[[ -n "$CORE" && -r "$CORE/temp1_input" ]] || TCRIT=0
+
+while true; do
+    [[ "$(current_level)" == "$want" ]] || echo "$cmd" > "$FAN"
+
+    if (( TCRIT > 0 )); then
+        if read -r t < "$CORE/temp1_input" 2>/dev/null; then
+            if (( t / 1000 > TCRIT )); then
+                echo "${0##*/}: $(( t / 1000 ))°C above ${TCRIT}°C — restoring automatic mode" >&2
+                echo "level auto" > "$FAN"
+                systemctl start thinkfan.service 2>/dev/null || true
+                exit 0
+            fi
+        fi
+    fi
+
+    sleep "$INTERVAL"
+done

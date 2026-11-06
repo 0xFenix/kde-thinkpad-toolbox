@@ -1,13 +1,13 @@
 {
   "KPlugin": {
     "Id": "org.local.caffeinetimer",
-    "Name": "Caffeine Timer",
-    "Description": "Timed KDE power and screen inhibition without Python",
+    "Name": "Caffeine & Fan Control",
+    "Description": "Keep-awake timer plus ThinkPad fan monitor and manual level control, without Python",
     "Icon": "preferences-system-power-management",
     "Category": "System Information",
-    "Version": "2.0.0",
+    "Version": "3.0.0",
     "License": "MIT",
-    "Authors": [{"Name":"Caffeine Timer"}]
+    "Authors": [{"Name":"Caffeine Timer"},{"Name":"AiSee","Email":"aiseeq@gmail.com"}]
   },
   "KPackageStructure": "Plasma/Applet",
   "X-Plasma-API-Minimum-Version": "6.0"

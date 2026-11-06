@@ -1,5 +1,7 @@
 # CMake build artifacts
 build/
+dist/
+*.plasmoid
 .qt/
 
 # Compiled objects / libraries
