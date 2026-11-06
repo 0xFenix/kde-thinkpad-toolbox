@@ -13,7 +13,6 @@ Kirigami.FormLayout {
     property alias cfg_tempSensorId: tempSensor.text
     property alias cfg_showFrequency: showFrequency.checked
     property alias cfg_showThrottling: showThrottling.checked
-}
 
     QQC2.TextField {
         id: fanSensor

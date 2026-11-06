@@ -60,8 +60,10 @@ timer, and three small bash helpers for ThinkPad fan control. **No Python.**
 - `hold` writes `level N` (no tabs) — thinkpad_acpi accepts it; don't "fix".
 - Safety net (`TCRIT`) is force-disabled for levels 6/7/full-speed by design
   (they cool better than auto). `level 0` = fan off: treat changes here carefully.
-- `qmllint contents/ui/main.qml contents/ui/ConfigGeneral.qml` passes clean —
-  keep it that way. No test suite, CI, or linter otherwise.
+- `QT_QPA_PLATFORM=offscreen qmllint contents/ui/main.qml contents/ui/ConfigGeneral.qml`
+  passes clean — keep it that way. (qmllint segfaults without the offscreen
+  platform var; a bare `qmllint ... | head` also masks its exit code.)
+  No test suite, CI, or other linter.
 - Commits use Conventional Commits (`feat:`, `fix:`, `docs:`, …).
 
 ## Verify a change
