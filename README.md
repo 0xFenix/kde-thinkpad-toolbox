@@ -30,6 +30,13 @@ runs only while a manual level is pinned. Zero idle footprint otherwise.
 - Safety net: a pinned level is released if the CPU exceeds 90 °C.
 - Failed level changes are reported in the popup instead of failing silently.
 
+### Touchpad tab (any laptop)
+- One-click enable/disable, with the current state shown big.
+- A `Touchpad: OFF` line appears in the tooltip while disabled, so you never
+  wonder why the cursor is gone.
+- State is read from KWin, so external toggles (e.g. a Fn key or shortcut)
+  are reflected within seconds.
+
 ## Requirements
 
 - KDE Plasma 6 (Plasma/Applet `6.0` API or newer)

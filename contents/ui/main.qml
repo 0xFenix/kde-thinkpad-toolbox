@@ -37,6 +37,14 @@ PlasmoidItem {
     property string fanError: ""
     property string currentTab: "timer"
 
+    // --- Touchpad state ---
+    // "" = not polled yet; "enabled" / "disabled" / "unavailable" (no touchpad).
+    readonly property string touchpadHelper: "/usr/local/bin/toolbox-touchpad"
+    property string touchpadState: ""
+    property string touchpadName: ""
+    property bool touchpadHelperMissing: false
+    property string touchpadError: ""
+
     // Throttling is derived from the growth of the kernel event counter between
     // polls: package_throttle_total_time_ms stays 0 on several Intel generations,
     // while the counter is reliable. Note this reflects *thermal* throttling only —
@@ -63,6 +71,7 @@ PlasmoidItem {
     toolTipMainText: "System Toolbox"
     toolTipSubText: (active ? (expires === 0 ? "Active indefinitely" : formatTime(remaining) + " remaining") : "Power saving enabled")
                     + (fanDetected ? "\n" + temp + "°C, " + rpm + " RPM" : "")
+                    + (touchpadState === "disabled" ? "\nTouchpad: OFF" : "")
 
     function formatTime(sec) {
         var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60
@@ -72,9 +81,9 @@ PlasmoidItem {
     function refresh() { run("status") }
     function start() { run("start " + selectedMinutes + " " + mode) }
     function stop() { run("stop") }
-    Component.onCompleted: { refresh(); fanExec.poll() }
+    Component.onCompleted: { refresh(); fanExec.poll(); touchExec.poll() }
     Timer { interval: 1000; running: root.active; repeat: true; onTriggered: { root.nowSeconds = Date.now() / 1000; if (root.expires > 0 && root.remaining === 0) root.refresh() } }
-    Timer { interval: 5000; running: true; repeat: true; onTriggered: root.refresh() }
+    Timer { interval: 5000; running: true; repeat: true; onTriggered: { root.refresh(); touchExec.poll() } }
     P5.DataSource {
         id: executor
         engine: "executable"
@@ -176,6 +185,57 @@ PlasmoidItem {
         onTriggered: fanExec.poll()
     }
 
+    // Touchpad state lives in KWin; the widget only shells out to qdbus6 via
+    // the helper, which discovers the touchpad node on every call (eventN
+    // varies per machine and boot). Toggle is NoReply, so re-poll after it.
+    P5.DataSource {
+        id: touchExec
+        engine: "executable"
+        connectedSources: []
+
+        onNewData: function(source, data) {
+            touchExec.disconnectSource(source)
+            if (data["exit code"] !== 0) {
+                var err = ((data.stderr || "").trim())
+                if (err === "") {
+                    root.touchpadHelperMissing = true
+                } else {
+                    root.touchpadError = err
+                }
+                return
+            }
+            root.touchpadHelperMissing = false
+            var out = ((data.stdout || "").trim())
+            if (out === "unavailable" || out === "") {
+                root.touchpadState = "unavailable"
+            } else {
+                var parts = out.split("|")
+                root.touchpadState = parts[0]
+                root.touchpadName = parts.length > 1 ? parts[1] : ""
+            }
+            root.touchpadError = ""
+            if (source !== root.touchpadHelper + " status") {
+                touchRefresh.restart()
+            }
+        }
+
+        function poll() {
+            touchExec.connectSource(root.touchpadHelper + " status")
+        }
+
+        function toggle() {
+            root.touchpadError = ""
+            touchExec.connectSource(root.touchpadHelper + " toggle")
+        }
+    }
+
+    Timer {
+        id: touchRefresh
+        interval: 700
+        repeat: false
+        onTriggered: touchExec.poll()
+    }
+
     compactRepresentation: MouseArea {
         implicitWidth: Kirigami.Units.iconSizes.medium
         implicitHeight: Kirigami.Units.iconSizes.medium
@@ -205,6 +265,12 @@ PlasmoidItem {
                 text: "Fan"
                 highlighted: root.currentTab === "fan"
                 onClicked: root.currentTab = "fan"
+            }
+            PC3.Button {
+                Layout.fillWidth: true
+                text: "Touchpad"
+                highlighted: root.currentTab === "touchpad"
+                onClicked: root.currentTab = "touchpad"
             }
         }
 
@@ -356,6 +422,63 @@ PlasmoidItem {
                 visible: root.fanError.length > 0
                 type: Kirigami.MessageType.Error
                 text: root.fanError
+            }
+
+            Item { Layout.fillHeight: true }
+        }
+
+        // ---- Touchpad page ----
+        ColumnLayout {
+            visible: root.currentTab === "touchpad"
+            spacing: Kirigami.Units.smallSpacing
+
+            Kirigami.InlineMessage {
+                Layout.fillWidth: true
+                visible: root.touchpadHelperMissing
+                type: Kirigami.MessageType.Error
+                text: "Helper script is missing. Run install.sh from the project."
+            }
+            Kirigami.InlineMessage {
+                Layout.fillWidth: true
+                visible: !root.touchpadHelperMissing && root.touchpadState === "unavailable"
+                type: Kirigami.MessageType.Warning
+                text: "No touchpad found on this machine."
+            }
+
+            PC3.Label {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                text: root.touchpadState === "enabled" ? "Touchpad: ON"
+                      : root.touchpadState === "disabled" ? "Touchpad: OFF" : "…"
+                font.pixelSize: 28
+                font.bold: true
+                color: root.touchpadState === "disabled" ? Kirigami.Theme.negativeTextColor
+                      : root.touchpadState === "enabled" ? Kirigami.Theme.positiveTextColor
+                      : Kirigami.Theme.disabledTextColor
+            }
+
+            PC3.Label {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                visible: root.touchpadName !== "" && root.touchpadState !== "unavailable"
+                text: root.touchpadName
+                opacity: 0.65
+                elide: Text.ElideMiddle
+            }
+
+            PC3.Button {
+                Layout.fillWidth: true
+                text: root.touchpadState === "disabled" ? "Enable touchpad" : "Disable touchpad"
+                enabled: root.touchpadState === "enabled" || root.touchpadState === "disabled"
+                highlighted: true
+                onClicked: touchExec.toggle()
+            }
+
+            Kirigami.InlineMessage {
+                Layout.fillWidth: true
+                visible: root.touchpadError.length > 0
+                type: Kirigami.MessageType.Error
+                text: root.touchpadError
             }
 
             Item { Layout.fillHeight: true }

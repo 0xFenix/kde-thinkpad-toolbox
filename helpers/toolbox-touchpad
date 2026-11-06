@@ -1,0 +1,56 @@
+#!/bin/bash
+# Reports and toggles the touchpad for the Touchpad tab of System Toolbox.
+#
+#   toolbox-touchpad status   -- print state, exit 0
+#   toolbox-touchpad toggle   -- flip state via kded, print new state
+#
+# Output: enabled|<name> | disabled|<name> | unavailable
+#
+# State is read from KWin (org.kde.KWin.InputDevice.enabled): the kded toggle
+# call is NoReply, and the sysName (eventN) varies per machine and boot, so the
+# touchpad node is discovered by its touchpad==true property on every call.
+# Works unprivileged on the session bus; any laptop with a touchpad.
+set -u
+
+QDBUS=$(command -v qdbus6) || { echo "unavailable"; exit 0; }
+KDED_TOUCHPAD="org.kde.touchpad /modules/kded_touchpad"
+
+find_touchpad() {
+    local node is_tp
+    while read -r node; do
+        [[ -n "$node" ]] || continue
+        is_tp=$($QDBUS org.kde.KWin "/org/kde/KWin/InputDevice/$node" \
+            org.freedesktop.DBus.Properties.Get org.kde.KWin.InputDevice touchpad 2>/dev/null) || continue
+        if [[ "$is_tp" == "true" ]]; then echo "$node"; return 0; fi
+    done < <($QDBUS org.kde.KWin /org/kde/KWin/InputDevice \
+        org.freedesktop.DBus.Properties.Get org.kde.KWin.InputDeviceManager devicesSysNames 2>/dev/null)
+    return 1
+}
+
+report() {
+    local node=$1 enabled name
+    enabled=$($QDBUS org.kde.KWin "/org/kde/KWin/InputDevice/$node" \
+        org.freedesktop.DBus.Properties.Get org.kde.KWin.InputDevice enabled 2>/dev/null) \
+        || { echo "unavailable"; return 1; }
+    name=$($QDBUS org.kde.KWin "/org/kde/KWin/InputDevice/$node" \
+        org.freedesktop.DBus.Properties.Get org.kde.KWin.InputDevice name 2>/dev/null) \
+        || name="touchpad"
+    if [[ "$enabled" == "true" ]]; then echo "enabled|$name"; else echo "disabled|$name"; fi
+}
+
+case "${1:-status}" in
+    status)
+        node=$(find_touchpad) || { echo "unavailable"; exit 0; }
+        report "$node"
+        ;;
+    toggle)
+        node=$(find_touchpad) || { echo "unavailable"; exit 0; }
+        # shellcheck disable=SC2086
+        $QDBUS $KDED_TOUCHPAD org.kde.touchpad.toggle 2>/dev/null \
+            || { echo "toggle failed" >&2; exit 1; }
+        report "$node"
+        ;;
+    *)
+        echo "usage: ${0##*/} status|toggle" >&2; exit 2
+        ;;
+esac

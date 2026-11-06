@@ -1,8 +1,9 @@
 # AGENTS.md
 
 KDE Plasma 6 "System Toolbox" plasmoid — one panel icon opening a popup with
-tool tabs (currently **Timer** + **Fan**), a native C++/Qt6 D-Bus helper for the
-timer, and three small bash helpers for ThinkPad fan control. **No Python.**
+tool tabs (currently **Timer** + **Fan** + **Touchpad**), a native C++/Qt6
+D-Bus helper for the timer, and small bash helpers for fan control
+(ThinkPad-only) and touchpad toggle (any laptop). **No Python.**
 (Dir is `caffeine-timer-native`; GitHub remote is `kde-caffeine-timer`.)
 
 ## Components and IPC
@@ -30,6 +31,11 @@ timer, and three small bash helpers for ThinkPad fan control. **No Python.**
   systemd unit (`systemd-run --collect --unit=thinkpad-fan-hold`) and re-asserts
   the level; reads tunables from `/etc/thinkpad-fan-hold.conf` with env override.
   `hold` must validate INTERVAL/TCRIT **before** touching hardware.
+- `helpers/toolbox-touchpad` — `status`/`toggle` for the touchpad. Toggle goes
+  through kded (`org.kde.touchpad.toggle`, NoReply); state is read from KWin
+  (`org.kde.KWin.InputDevice.enabled`). The touchpad node is discovered on
+  every call via `devicesSysNames` + `touchpad==true` because eventN varies
+  per machine/boot. Unprivileged; exit 0 + `unavailable` when no touchpad.
 - `polkit/*.policy` — action id `com.github.aiseeq.thinkpadfan.set` is kept
   stable on purpose (existing installs keep working).
 - `contents/config/{config.qml,main.xml}` + `contents/ui/ConfigGeneral.qml` —
@@ -39,8 +45,9 @@ timer, and three small bash helpers for ThinkPad fan control. **No Python.**
 ## Build / install
 
 - `./install.sh` builds **and** installs: cmake timer helper → `~/.local/bin`,
-  fan helpers → `/usr/local/bin` + polkit + `/etc/thinkpad-fan-hold.conf`
-  (sudo, only if missing), then `kpackagetool6 install/upgrade .`.
+  `thinkpad-fan-*` + `toolbox-touchpad` → `/usr/local/bin` + polkit +
+  `/etc/thinkpad-fan-hold.conf` (sudo, conf only if missing), then
+  `kpackagetool6 install/upgrade .`.
 - `--uninstall` restores `level auto` to the fan FIRST (never leave it pinned),
   then removes helpers, polkit rule, applet. Keeps the .conf if tuned.
 - Build only: `cmake -S native -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j"$(nproc)"`.

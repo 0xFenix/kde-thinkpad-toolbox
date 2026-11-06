@@ -12,6 +12,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APPLET_ID=org.local.caffeinetimer
 FAN_HELPERS=(thinkpad-fan-status thinkpad-fan-set thinkpad-fan-hold)
+TOOLBOX_HELPERS=(toolbox-touchpad)
 POLICY=com.github.aiseeq.thinkpadfan.policy
 FAN=/proc/acpi/ibm/fan
 
@@ -41,7 +42,7 @@ if [[ "${1:-}" == "--uninstall" ]]; then
         $SUDO systemctl reset-failed thinkpad-fan-hold.service 2>/dev/null || true
         echo "level auto" | $SUDO tee "$FAN" >/dev/null || true
     fi
-    for h in "${FAN_HELPERS[@]}"; do $SUDO rm -f "/usr/local/bin/$h"; done
+    for h in "${FAN_HELPERS[@]}" "${TOOLBOX_HELPERS[@]}"; do $SUDO rm -f "/usr/local/bin/$h"; done
     $SUDO rm -f "/usr/share/polkit-1/actions/$POLICY"
     echo "removed (kept /etc/thinkpad-fan-hold.conf if you tuned it)."
     echo 'Restart the panel: systemctl --user restart plasma-plasmashell'
@@ -54,13 +55,13 @@ cmake --build "$HERE/build" -j "$(nproc)"
 install -Dm755 "$HERE/build/caffeine-timer-helper" "$HOME/.local/bin/caffeine-timer-helper"
 echo 'timer helper -> ~/.local/bin/caffeine-timer-helper'
 
-# --- 2. fan helpers + polkit (system level) ------------------------------------
+# --- 2. fan + toolbox helpers (system level, no privilege to RUN) --------------
 need_root
 
-for h in "${FAN_HELPERS[@]}"; do
+for h in "${FAN_HELPERS[@]}" "${TOOLBOX_HELPERS[@]}"; do
     $SUDO install -m 0755 "$HERE/helpers/$h" "/usr/local/bin/$h"
 done
-echo 'fan helpers  -> /usr/local/bin/'
+echo 'helpers      -> /usr/local/bin/'
 
 $SUDO install -m 0644 "$HERE/polkit/$POLICY" "/usr/share/polkit-1/actions/$POLICY"
 echo "polkit       -> /usr/share/polkit-1/actions/$POLICY"
