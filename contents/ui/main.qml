@@ -189,7 +189,7 @@ PlasmoidItem {
     }
 
     fullRepresentation: ColumnLayout {
-        implicitWidth: Kirigami.Units.gridUnit * 19
+        implicitWidth: Kirigami.Units.gridUnit * 22
         spacing: Kirigami.Units.smallSpacing * 2
 
         RowLayout {
