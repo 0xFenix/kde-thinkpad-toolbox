@@ -26,10 +26,5 @@
       <default>true</default>
     </entry>
 
-    <!-- Compact panel line: rpm, frequency or temperature -->
-    <entry name="compactSecondLine" type="String">
-      <default>frequency</default>
-    </entry>
-
   </group>
 </kcfg>

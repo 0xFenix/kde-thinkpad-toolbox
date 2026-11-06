@@ -1,8 +1,8 @@
-# Caffeine & Fan Control
+# System Toolbox
 
-A lightweight [KDE Plasma 6](https://kde.org/plasma-desktop/) widget that keeps your
-system awake on a timer **and** monitors/controls the ThinkPad fan — straight from
-the panel, **without any Python**.
+A lightweight [KDE Plasma 6](https://kde.org/plasma-desktop/) widget for everyday
+system tools — starting with a keep-awake timer **and** ThinkPad fan
+monitor/control — straight from the panel, **without any Python**.
 
 It pairs a small QML plasmoid (two tabs: **Timer** and **Fan**) with a native
 C++/Qt6 D-Bus helper for the timer plus three small audited bash helpers for the
@@ -19,7 +19,7 @@ runs only while a manual level is pinned. Zero idle footprint otherwise.
 - **Optional CLI** — the same helper is scriptable from the terminal.
 
 ### Fan tab (ThinkPad only)
-- Fan RPM, temperature, CPU frequency in the panel (second line is configurable).
+- Fan RPM, temperature, CPU frequency and throttling state in the popup.
 - **Throttling indicator** — the frequency turns red the moment the CPU is
   thermally throttled.
 - One-click fan levels: `automatic`, `0`–`7`, `full speed`.
@@ -58,7 +58,7 @@ The script builds the timer helper (`~/.local/bin`), installs the fan helpers
 registers the plasmoid with `kpackagetool6`. The fan part asks for sudo;
 the rest never runs as root.
 
-Then: panel → **Add Widgets** → **Caffeine & Fan Control**.
+Then: panel → **Add Widgets** → **System Toolbox**.
 
 > Restart `plasmashell` or re-login after install. Make sure `~/.local/bin` is
 > on the Plasma session `PATH` (it is after a re-login).

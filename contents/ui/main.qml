@@ -29,7 +29,6 @@ PlasmoidItem {
                                            || "cpu/all/maximumTemperature"
     property bool showFrequency: Plasmoid.configuration.showFrequency !== false
     property bool showThrottling: Plasmoid.configuration.showThrottling !== false
-    property string compactFanLine: Plasmoid.configuration.compactSecondLine || "frequency"
 
     property string fanLevel: ""
     property bool thinkfanRunning: false
@@ -61,7 +60,7 @@ PlasmoidItem {
     readonly property int temp: tempSensor.value !== undefined ? Math.round(tempSensor.value) : 0
 
     preferredRepresentation: compactRepresentation
-    toolTipMainText: "Caffeine & Fan Control"
+    toolTipMainText: "System Toolbox"
     toolTipSubText: (active ? (expires === 0 ? "Active indefinitely" : formatTime(remaining) + " remaining") : "Power saving enabled")
                     + (fanDetected ? "\n" + temp + "°C, " + rpm + " RPM" : "")
 
@@ -178,44 +177,14 @@ PlasmoidItem {
     }
 
     compactRepresentation: MouseArea {
-        implicitWidth: row.implicitWidth + Kirigami.Units.smallSpacing
+        implicitWidth: Kirigami.Units.iconSizes.medium
         implicitHeight: Kirigami.Units.iconSizes.medium
         onClicked: root.expanded = !root.expanded
-        RowLayout {
-            id: row
+        Kirigami.Icon {
             anchors.centerIn: parent
-            spacing: Kirigami.Units.smallSpacing / 2
-            ColumnLayout {
-                spacing: 0
-                PC3.Label {
-                    Layout.alignment: Qt.AlignHCenter
-                    visible: root.fanDetected
-                    text: root.temp + "°"
-                    font.pointSize: Kirigami.Theme.smallFont.pointSize
-                    lineHeight: 0.9
-                }
-                PC3.Label {
-                    Layout.alignment: Qt.AlignHCenter
-                    visible: root.fanDetected && root.compactFanLine !== "temperature"
-                    text: {
-                        if (root.compactFanLine === "rpm")
-                            return root.rpm
-                        return root.freqMhz >= 1000 ? (root.freqMhz / 1000).toFixed(1) + "G"
-                                                    : root.freqMhz + "M"
-                    }
-                    font.pointSize: Kirigami.Theme.smallFont.pointSize
-                    font.bold: root.throttling
-                    // Red means the CPU is being throttled right now.
-                    color: root.throttling ? Kirigami.Theme.negativeTextColor
-                                           : Kirigami.Theme.textColor
-                    lineHeight: 0.9
-                }
-            }
-            Kirigami.Icon {
-                Layout.preferredWidth: Math.min(parent.width, parent.height)
-                Layout.preferredHeight: Math.min(parent.width, parent.height)
-                source: root.active ? "user-available" : "preferences-system-power-management"
-            }
+            width: Math.min(parent.width, parent.height)
+            height: width
+            source: root.active ? "chronometer" : "applications-system"
         }
     }
 

@@ -1,11 +1,11 @@
 {
   "KPlugin": {
     "Id": "org.local.caffeinetimer",
-    "Name": "Caffeine & Fan Control",
+    "Name": "System Toolbox",
     "Description": "Keep-awake timer plus ThinkPad fan monitor and manual level control, without Python",
     "Icon": "preferences-system-power-management",
     "Category": "System Information",
-    "Version": "3.0.0",
+    "Version": "3.1.0",
     "License": "MIT",
     "Authors": [{"Name":"Caffeine Timer"},{"Name":"AiSee","Email":"aiseeq@gmail.com"}]
   },

@@ -1,14 +1,16 @@
 # AGENTS.md
 
-KDE Plasma 6 "Caffeine & Fan Control" plasmoid — one QML widget with two tabs
-(**Timer** + **Fan**), a native C++/Qt6 D-Bus helper for the timer, and three
-small bash helpers for ThinkPad fan control. **No Python.** (Dir is
-`caffeine-timer-native`; GitHub remote is `kde-caffeine-timer`.)
+KDE Plasma 6 "System Toolbox" plasmoid — one panel icon opening a popup with
+tool tabs (currently **Timer** + **Fan**), a native C++/Qt6 D-Bus helper for the
+timer, and three small bash helpers for ThinkPad fan control. **No Python.**
+(Dir is `caffeine-timer-native`; GitHub remote is `kde-caffeine-timer`.)
 
 ## Components and IPC
 
-- `contents/ui/main.qml` — the plasmoid. Tab switcher is two plain `PC3.Button`s
-  (`currentTab`), not a TabBar. Pages are `ColumnLayout`s toggled by `visible`.
+- `contents/ui/main.qml` — the plasmoid. Panel shows a single icon
+  (`applications-system`, `chronometer` while the timer runs); click opens the
+  popup. Tab switcher is two plain `PC3.Button`s (`currentTab`), not a TabBar.
+  Pages are `ColumnLayout`s toggled by `visible`.
 - Timer path: `P5.DataSource id: executor` (`engine: "executable"`) runs
   `caffeine-timer-helper <args>` and parses **JSON**.
 - Fan path: separate `P5.DataSource id: fanExec`. Status output is

@@ -100,7 +100,7 @@ cat <<'EOF'
 
 Done. Now:
   1. systemctl --user restart plasma-plasmashell (or re-login)
-  2. right-click the panel -> Add Widgets -> "Caffeine & Fan Control"
+  2. right-click the panel -> Add Widgets -> "System Toolbox"
   3. if the fan reading stays 0, open the widget settings and pick the right
      sensor id (the settings page shows how to list them)
 EOF

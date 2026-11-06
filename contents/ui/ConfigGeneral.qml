@@ -13,7 +13,7 @@ Kirigami.FormLayout {
     property alias cfg_tempSensorId: tempSensor.text
     property alias cfg_showFrequency: showFrequency.checked
     property alias cfg_showThrottling: showThrottling.checked
-    property string cfg_compactSecondLine
+}
 
     QQC2.TextField {
         id: fanSensor
@@ -37,19 +37,6 @@ Kirigami.FormLayout {
     }
 
     Item { Kirigami.FormData.isSection: true }
-
-    QQC2.ComboBox {
-        Kirigami.FormData.label: "Second line in panel:"
-        model: [
-            { value: "frequency",   label: "CPU frequency" },
-            { value: "rpm",         label: "Fan RPM" },
-            { value: "temperature", label: "Temperature only" }
-        ]
-        textRole: "label"
-        valueRole: "value"
-        onActivated: page.cfg_compactSecondLine = currentValue
-        Component.onCompleted: currentIndex = indexOfValue(page.cfg_compactSecondLine)
-    }
 
     QQC2.CheckBox {
         id: showFrequency
