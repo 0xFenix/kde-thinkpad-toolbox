@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# All-in-one installer: Caffeine Timer helper + ThinkPad fan helpers + plasmoid.
+# All-in-one installer: timer helper + ThinkPad fan helpers + touchpad helper + plasmoid.
 #
 #   ./install.sh            build, install or upgrade everything
 #   ./install.sh --uninstall remove everything this script installed
@@ -101,7 +101,7 @@ cat <<'EOF'
 
 Done. Now:
   1. systemctl --user restart plasma-plasmashell (or re-login)
-  2. right-click the panel -> Add Widgets -> "System Toolbox"
+  2. right-click the panel -> Add Widgets -> "ThinkPad Toolbox"
   3. if the fan reading stays 0, open the widget settings and pick the right
      sensor id (the settings page shows how to list them)
 EOF

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-KDE Plasma 6 "System Toolbox" plasmoid — one panel icon opening a popup with
+KDE Plasma 6 "ThinkPad Toolbox" plasmoid — one panel icon opening a popup with
 tool tabs (currently **Timer** + **Fan** + **Touchpad**), a native C++/Qt6
 D-Bus helper for the timer, and small bash helpers for fan control
 (ThinkPad-only) and touchpad toggle (any laptop). **No Python.**

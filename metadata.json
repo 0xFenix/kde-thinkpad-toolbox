@@ -1,13 +1,13 @@
 {
   "KPlugin": {
     "Id": "org.local.caffeinetimer",
-    "Name": "System Toolbox",
-    "Description": "Keep-awake timer plus ThinkPad fan monitor and manual level control, without Python",
+    "Name": "ThinkPad Toolbox",
+    "Description": "ThinkPad toolkit: keep-awake timer, fan monitor and control, touchpad toggle — without Python",
     "Icon": "preferences-system-power-management",
     "Category": "System Information",
-    "Version": "3.2.0",
+    "Version": "3.3.0",
     "License": "MIT",
-    "Authors": [{"Name":"Caffeine Timer"},{"Name":"AiSee","Email":"aiseeq@gmail.com"}]
+    "Authors": [{"Name":"0xFenix","Email":"tranduchuypro@gmail.com"},{"Name":"AiSee","Email":"aiseeq@gmail.com"}]
   },
   "KPackageStructure": "Plasma/Applet",
   "X-Plasma-API-Minimum-Version": "6.0"

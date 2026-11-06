@@ -1,4 +1,4 @@
-# System Toolbox
+# ThinkPad Toolbox
 
 A lightweight [KDE Plasma 6](https://kde.org/plasma-desktop/) widget for everyday
 system tools — starting with a keep-awake timer **and** ThinkPad fan
@@ -65,7 +65,7 @@ The script builds the timer helper (`~/.local/bin`), installs the fan helpers
 registers the plasmoid with `kpackagetool6`. The fan part asks for sudo;
 the rest never runs as root.
 
-Then: panel → **Add Widgets** → **System Toolbox**.
+Then: panel → **Add Widgets** → **ThinkPad Toolbox**.
 
 > Restart `plasmashell` or re-login after install. Make sure `~/.local/bin` is
 > on the Plasma session `PATH` (it is after a re-login).
@@ -161,8 +161,10 @@ not leave a laptop pinned at a low level under sustained load.
 
 ## Credits
 
-Fan control ported from [plasma-thinkpad-fan](https://github.com/aiseeq/plasma-thinkpad-fan)
-by AiSee (MIT). Timer core by Caffeine Timer.
+- Fan control (helpers, hold daemon, polkit approach, sensor logic) ported from
+  [plasma-thinkpad-fan](https://github.com/aiseeq/plasma-thinkpad-fan)
+  by AiSee (MIT License). Many thanks for the original work.
+- Timer core by 0xFenix ([tranduchuypro@gmail.com](mailto:tranduchuypro@gmail.com)).
 
 ## License
 

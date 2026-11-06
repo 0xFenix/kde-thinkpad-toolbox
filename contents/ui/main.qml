@@ -68,7 +68,7 @@ PlasmoidItem {
     readonly property int temp: tempSensor.value !== undefined ? Math.round(tempSensor.value) : 0
 
     preferredRepresentation: compactRepresentation
-    toolTipMainText: "System Toolbox"
+    toolTipMainText: "ThinkPad Toolbox"
     toolTipSubText: (active ? (expires === 0 ? "Active indefinitely" : formatTime(remaining) + " remaining") : "Power saving enabled")
                     + (fanDetected ? "\n" + temp + "°C, " + rpm + " RPM" : "")
                     + (touchpadState === "disabled" ? "\nTouchpad: OFF" : "")
@@ -282,7 +282,7 @@ PlasmoidItem {
                 Layout.fillWidth: true
                 PC3.Label { text: "☕"; font.pixelSize: 26 }
                 ColumnLayout {
-                    PC3.Label { text: "Caffeine Timer"; font.bold: true }
+                    PC3.Label { text: "Wake Timer"; font.bold: true }
                     PC3.Label { text: root.active ? "Keeping your system awake" : "Ready to start"; opacity: 0.7 }
                 }
                 PC3.Label { text: root.active ? "● ON" : "OFF"; color: root.active ? Kirigami.Theme.positiveTextColor : Kirigami.Theme.disabledTextColor }
